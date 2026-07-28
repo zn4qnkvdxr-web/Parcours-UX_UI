@@ -1,0 +1,85 @@
+{
+  "_lisezmoi": "Seul fichier à modifier pour changer le contenu. Les identifiants (id) sont la mémoire de la progression : ne jamais les réutiliser ni les renommer une fois publiés. Ajouter une tâche = ajouter un objet avec un nouvel id. Supprimer une tâche = retirer l'objet (sa coche est ignorée).",
+
+  "titre": "Parcours",
+  "titreAccent": "UX/UI",
+  "sousTitre": "Des composants isolés à la page complète. Une étape par semaine, un jalon à valider.",
+  "labelJalons": "jalons validés",
+
+  "etapes": [
+    {
+      "id": "e1",
+      "titre": "Fondations : bibliothèque et CTA",
+      "semaine": "Semaine du 3 août",
+      "jalon": "Une modification de style se propage à tout l'écran ; le CTA s'adapte à son label. Aucune valeur en dur.",
+      "taches": [
+        { "id": "e1-palette",  "texte": "Recenser la palette existante" },
+        { "id": "e1-colors",   "texte": "Créer les color styles : primaire, secondaire, neutres, statuts" },
+        { "id": "e1-texts",    "texte": "Créer les text styles : titre, sous-titre, corps, légende, label" },
+        { "id": "e1-cta",      "texte": "Construire le CTA : composant unique, variantes, label et icône paramétrables" },
+        { "id": "e1-test",     "texte": "Valider le test du label long" }
+      ]
+    },
+    {
+      "id": "e2",
+      "titre": "Famille de composants",
+      "semaine": "Semaine du 10 août",
+      "jalon": "Quatre à cinq composants réutilisables, dont un composé. Grille définie.",
+      "taches": [
+        { "id": "e2-decliner", "texte": "Décliner les composants d'une page : carte, champ, badge, en-tête" },
+        { "id": "e2-imbriquer","texte": "Imbriquer un composant dans un autre (carte contenant le CTA)" },
+        { "id": "e2-lier",     "texte": "Rattacher chaque composant à la bibliothèque" },
+        { "id": "e2-grille",   "texte": "Définir la grille : colonnes, gouttières, base 4/8 pt" }
+      ]
+    },
+    {
+      "id": "e3",
+      "titre": "Composition d'écran",
+      "semaine": "Semaine du 17 août",
+      "jalon": "Une page complète et cohérente, composée uniquement de composants posés sur la grille.",
+      "taches": [
+        { "id": "e3-poser",    "texte": "Placer les composants sur la grille" },
+        { "id": "e3-echelle",  "texte": "Aligner les espacements sur l'échelle" },
+        { "id": "e3-hierarchie","texte": "Hiérarchiser chaque bloc par rapport aux autres" }
+      ]
+    },
+    {
+      "id": "e4",
+      "titre": "États de l'écran",
+      "semaine": "Semaine du 24 août",
+      "jalon": "La page reste lisible dans tous ses états.",
+      "taches": [
+        { "id": "e4-etats",    "texte": "Décliner les états : vide, chargement, erreur, contenu long" },
+        { "id": "e4-retour",   "texte": "Prévoir un retour visuel pour chaque action" },
+        { "id": "e4-zones",    "texte": "Dimensionner les zones cliquables" }
+      ]
+    },
+    {
+      "id": "e5",
+      "titre": "Prototype",
+      "semaine": "Semaine du 24 août",
+      "jalon": "Un parcours cliquable qui démontre une décision de conception.",
+      "taches": [
+        { "id": "e5-hypothese","texte": "Formuler l'hypothèse d'usage à valider" },
+        { "id": "e5-cabler",   "texte": "Câbler le parcours : interactions, smart animate" },
+        { "id": "e5-doc",      "texte": "Documenter la décision démontrée" }
+      ]
+    },
+    {
+      "id": "e6",
+      "titre": "Une page complète, de bout en bout",
+      "semaine": "Semaine du 31 août",
+      "jalon": "Une page complète, accompagnée d'un comparatif avant / après.",
+      "taches": [
+        { "id": "e6-composer", "texte": "Composer une page complète : composants, grille, états, prototype" },
+        { "id": "e6-avant",    "texte": "Reprendre une maquette existante pour le comparatif" },
+        { "id": "e6-recit",    "texte": "Rédiger le récit : contexte, contrainte, choix, résultat" }
+      ]
+    }
+  ],
+
+  "reperes": [
+    { "cle": "Critère",  "texte": "Un élément se réajuste et se réutilise sans intervention manuelle." },
+    { "cle": "Semaines", "texte": "Repères indicatifs. Un décalage reporte la suite, il n'annule rien." }
+  ]
+}

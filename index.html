@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="noindex, nofollow">
+<title>Parcours UX/UI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300..700&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* signal — Norsys */
+  --norsys:#8BC53F;
+  --norsys-deep:#4C7A22;
+  /* atmosphère */
+  --flame:#F0A63C;
+
+  --ink:#0F0B11;
+  --text:#EDE0CE;
+  --text-dim:rgba(237,224,206,.70);
+  --text-faint:rgba(237,224,206,.52);
+  --ui-line:rgba(237,224,206,.44);
+
+  --glass:rgba(240,225,205,.045);
+  --glass-hi:rgba(255,240,220,.09);
+  --line:rgba(240,225,205,.10);
+  --line-soft:rgba(240,225,205,.06);
+
+  --bloom-a:#5C1F2E;
+  --bloom-b:#33203F;
+  --bloom-c:#6E5A1C;
+  --bloom-op:.55;
+
+  --glow:0;
+  --r:20px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+
+body{
+  font-family:'Archivo',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+  background:var(--ink);
+  color:var(--text);
+  min-height:100vh;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+/* ─────────── atmosphère ─────────── */
+.sky{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.bloom{
+  position:absolute;border-radius:50%;filter:blur(84px);
+  opacity:calc(var(--bloom-op) * (.42 + .58 * var(--glow)));
+  will-change:transform;transition:opacity 1.6s ease;
+}
+.b1{width:76vw;height:76vw;min-width:620px;min-height:620px;background:var(--bloom-a);top:-24vw;left:-22vw;animation:drift1 74s ease-in-out infinite alternate}
+.b2{width:66vw;height:66vw;min-width:540px;min-height:540px;background:var(--bloom-b);bottom:-22vw;right:-20vw;animation:drift2 92s ease-in-out infinite alternate}
+.b3{width:52vw;height:52vw;min-width:420px;min-height:420px;background:var(--bloom-c);top:38%;left:34%;animation:drift3 64s ease-in-out infinite alternate;
+    opacity:calc(var(--bloom-op) * (.18 + .82 * var(--glow)))}
+
+@keyframes drift1{0%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(14vw,10vh,0) scale(1.14)}100%{transform:translate3d(4vw,22vh,0) scale(.96)}}
+@keyframes drift2{0%{transform:translate3d(0,0,0) scale(1.04)}50%{transform:translate3d(-16vw,-12vh,0) scale(.92)}100%{transform:translate3d(-6vw,-24vh,0) scale(1.12)}}
+@keyframes drift3{0%{transform:translate3d(0,0,0) scale(.9)}50%{transform:translate3d(-12vw,14vh,0) scale(1.2)}100%{transform:translate3d(10vw,-10vh,0) scale(1)}}
+
+.grain{
+  position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.055;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ─────────── gabarit ─────────── */
+.wrap{
+  position:relative;z-index:2;
+  max-width:660px;margin:0 auto;
+  padding:clamp(40px,9vw,72px) clamp(16px,5vw,28px) 110px;
+}
+.head{margin-bottom:clamp(26px,6vw,34px)}
+
+h1{
+  font-family:'Jost',ui-sans-serif,system-ui,sans-serif;
+  font-weight:600;font-size:clamp(36px,9.2vw,54px);
+  line-height:1.04;letter-spacing:-.028em;margin-bottom:12px;
+}
+h1 span{color:var(--flame);font-weight:500;letter-spacing:-.012em}
+.sub{font-size:14.5px;color:var(--text-dim);max-width:40ch}
+
+/* ─────────── progression ─────────── */
+.meter{margin-bottom:clamp(30px,7vw,44px)}
+.meter-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-bottom:11px}
+.meter-label{font-family:'Jost',sans-serif;font-weight:500;font-size:11px;letter-spacing:.17em;text-transform:uppercase;color:var(--text-faint)}
+.meter-count{font-family:'Jost',sans-serif;font-weight:400;font-size:15px;font-variant-numeric:tabular-nums;color:var(--text-dim)}
+.meter-count b{color:var(--norsys);font-weight:600}
+.track{height:2px;background:var(--line-soft);border-radius:2px;overflow:hidden}
+.fill{
+  height:100%;width:0%;border-radius:2px;
+  background:linear-gradient(90deg,var(--norsys-deep),var(--norsys));
+  box-shadow:0 0 14px rgba(139,197,63,.45);
+  transition:width .9s cubic-bezier(.22,1,.36,1);
+}
+
+/* ─────────── grille de cartes ─────────── */
+.grid{display:grid;grid-template-columns:1fr;gap:14px;align-items:start}
+
+.step{
+  position:relative;
+  background:var(--glass);
+  border:1px solid var(--line);
+  border-radius:var(--r);
+  padding:clamp(18px,4.4vw,26px);
+  -webkit-backdrop-filter:blur(30px) saturate(140%);backdrop-filter:blur(30px) saturate(140%);
+  box-shadow:inset 0 1px 0 var(--glass-hi),0 18px 40px -28px rgba(0,0,0,.65);
+  opacity:0;transform:translateY(16px);
+  animation:rise .9s cubic-bezier(.22,1,.36,1) forwards;
+  transition:border-color .6s ease,box-shadow .6s ease;
+  display:flex;flex-direction:column;
+}
+@keyframes rise{to{opacity:1;transform:none}}
+
+.step.lit{
+  border-color:rgba(139,197,63,.30);
+  box-shadow:inset 0 1px 0 var(--glass-hi),0 0 0 1px rgba(139,197,63,.06),0 22px 60px -34px rgba(240,166,60,.50);
+}
+
+.step-head{display:flex;align-items:flex-start;gap:13px;margin-bottom:5px}
+.wick{
+  position:relative;flex:none;width:9px;height:9px;margin-top:8px;border-radius:50%;
+  background:transparent;border:1px solid var(--ui-line);
+  transition:background .5s,border-color .5s,box-shadow .5s;
+}
+.step.lit .wick{
+  background:var(--norsys);border-color:var(--norsys);
+  box-shadow:0 0 12px 2px rgba(139,197,63,.50),0 0 30px 7px rgba(139,197,63,.18);
+}
+
+.step-title{
+  font-family:'Jost',ui-sans-serif,system-ui,sans-serif;
+  font-weight:600;font-size:19.5px;line-height:1.3;letter-spacing:-.016em;
+}
+.week{font-family:'Jost',sans-serif;font-weight:500;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-faint);margin:0 0 16px 22px}
+.jalon{
+  margin:0 0 18px 22px;padding-left:13px;border-left:1px solid var(--line);
+  font-size:13.5px;line-height:1.6;color:var(--text-dim);
+}
+.jalon b{color:var(--text);font-weight:500}
+
+/* ─────────── cases ─────────── */
+.tasks{list-style:none;margin-left:22px;flex:1}
+.task{display:flex;align-items:flex-start;gap:12px;padding:9px 0;cursor:pointer;min-height:38px}
+.task input{position:absolute;opacity:0;width:0;height:0}
+
+.dot{
+  position:relative;flex:none;width:19px;height:19px;margin-top:1px;border-radius:50%;
+  border:1.5px solid var(--ui-line);display:grid;place-items:center;
+  transition:border-color .35s,background .35s;
+}
+.dot svg{
+  width:11px;height:11px;overflow:visible;
+  stroke:var(--ink);stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:30;stroke-dashoffset:30;transition:stroke-dashoffset .34s ease .06s;
+}
+.task:hover .dot{border-color:var(--norsys)}
+.task input:focus-visible + .dot{outline:2px solid var(--norsys);outline-offset:3px}
+.task input:checked + .dot{background:var(--norsys);border-color:var(--norsys)}
+.task input:checked + .dot svg{stroke-dashoffset:0}
+.task input:checked ~ .task-label{color:var(--text-faint)}
+.task-label{font-size:14px;line-height:1.5;color:var(--text-dim);transition:color .4s}
+
+.dot::after{
+  content:'';position:absolute;inset:-4px;border-radius:50%;
+  background:radial-gradient(circle,rgba(139,197,63,.80),rgba(139,197,63,0) 68%);
+  opacity:0;transform:scale(.4);pointer-events:none;
+}
+.task input:checked + .dot::after{animation:ignite .75s cubic-bezier(.2,.8,.3,1)}
+@keyframes ignite{0%{opacity:.9;transform:scale(.4)}60%{opacity:.35;transform:scale(2.6)}100%{opacity:0;transform:scale(3.4)}}
+
+/* lecture seule */
+body.readonly .task{cursor:default}
+body.readonly .task:hover .dot{border-color:var(--ui-line)}
+body.readonly .task input:checked + .dot{border-color:var(--norsys)}
+
+/* ─────────── champ lien ─────────── */
+.link-row{display:flex;align-items:center;gap:11px;margin:20px 0 0 22px;padding-top:16px;border-top:1px solid var(--line-soft)}
+.glyph{width:14px;height:14px;flex:none;stroke:var(--ui-line);stroke-width:1.6;fill:none;transition:stroke .35s}
+.link-row:focus-within .glyph{stroke:var(--norsys)}
+.link-input{
+  flex:1;min-width:0;background:none;border:none;
+  font:400 13.5px/1.5 'Archivo',sans-serif;color:var(--text);
+  padding:4px 0;border-bottom:1px solid var(--line);transition:border-color .35s;
+}
+.link-input::placeholder{color:var(--text-faint)}
+.link-input:focus{outline:none;border-bottom-color:var(--norsys)}
+
+.link-static{
+  flex:1;min-width:0;font-size:13.5px;color:var(--text-faint);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.link-static a{color:var(--text-dim);text-decoration:none;border-bottom:1px solid var(--line)}
+.link-static a:hover{color:var(--norsys);border-bottom-color:var(--norsys)}
+
+.open-link{
+  flex:none;padding:6px 13px;border-radius:100px;
+  background:var(--glass);border:1px solid var(--line);
+  -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+  box-shadow:inset 0 1px 0 var(--glass-hi);
+  font:500 10.5px/1 'Jost',sans-serif;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--text-dim);cursor:pointer;
+  opacity:0;transform:translateX(-5px);pointer-events:none;
+  transition:opacity .4s,transform .4s,color .3s,border-color .3s;
+}
+.open-link.on{opacity:1;transform:none;pointer-events:auto}
+.open-link:hover{color:var(--norsys);border-color:var(--norsys)}
+
+/* ─────────── pied ─────────── */
+.notes[hidden]{display:none}
+.notes{margin-top:clamp(38px,9vw,58px);padding-top:22px;border-top:1px solid var(--line-soft);display:grid;gap:9px}
+.note{display:flex;gap:11px;font-size:12.5px;line-height:1.62;color:var(--text-faint)}
+.note span{color:var(--text-dim);flex:none}
+
+/* ─────────── pastille d'état ─────────── */
+.chip{
+  position:fixed;z-index:5;
+  right:clamp(14px,3vw,26px);bottom:clamp(14px,3vw,26px);
+  display:inline-flex;align-items:center;gap:9px;
+  padding:9px 15px;border-radius:100px;
+  background:var(--glass);border:1px solid var(--line);
+  -webkit-backdrop-filter:blur(22px) saturate(150%);backdrop-filter:blur(22px) saturate(150%);
+  box-shadow:inset 0 1px 0 var(--glass-hi),0 10px 30px -18px rgba(0,0,0,.8);
+  font:500 10.5px/1 'Jost',sans-serif;letter-spacing:.13em;text-transform:uppercase;color:var(--text-dim);
+  opacity:0;transform:translateY(8px);pointer-events:none;
+  transition:opacity .45s ease,transform .45s ease;
+}
+.chip.on{opacity:1;transform:none}
+.chip i{width:6px;height:6px;border-radius:50%;background:var(--text-faint);flex:none;transition:background .4s}
+.chip[data-state="saved"] i{background:var(--norsys);box-shadow:0 0 8px rgba(139,197,63,.7)}
+.chip[data-state="saving"] i{background:var(--flame);animation:pulse 1.1s ease-in-out infinite}
+.chip[data-state="error"] i{background:#E0563F}
+@keyframes pulse{50%{opacity:.25}}
+
+/* ─────────── état de chargement ─────────── */
+.boot{padding:40px 0;font-size:13.5px;color:var(--text-faint);letter-spacing:.02em}
+
+/* ─────────── large : deux cartes par ligne ─────────── */
+@media (min-width:880px){
+  .wrap{max-width:1140px;padding-top:88px;padding-bottom:130px}
+  .head{margin-bottom:38px}
+  h1{font-size:clamp(50px,4.6vw,64px)}
+  .sub{font-size:15.5px;max-width:46ch}
+  .meter{margin-bottom:52px}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+  .step{padding:34px}
+  .step-title{font-size:21px}
+  .notes{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 32px;margin-top:64px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::after{animation:none!important;transition-duration:.01ms!important}
+  .step{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<div class="sky" aria-hidden="true">
+  <div class="bloom b1"></div><div class="bloom b2"></div><div class="bloom b3"></div>
+</div>
+<div class="grain" aria-hidden="true"></div>
+
+<div class="chip" id="chip" role="status" aria-live="polite"><i></i><span id="chipText"></span></div>
+
+<main class="wrap">
+  <header class="head">
+    <h1 id="title">Parcours</h1>
+    <p class="sub" id="sub"></p>
+  </header>
+
+  <div class="meter" hidden id="meter">
+    <div class="meter-head">
+      <div class="meter-label">Progression</div>
+      <div class="meter-count"><b id="done">0</b> <span id="total"></span></div>
+    </div>
+    <div class="track"><div class="fill" id="fill"></div></div>
+  </div>
+
+  <div class="grid" id="grid"><p class="boot">Chargement du parcours…</p></div>
+
+  <div class="notes" id="notes" hidden></div>
+</main>
+
+<script>
+(() => {
+  'use strict';
+
+  const params   = new URLSearchParams(location.search);
+  const slug     = (params.get('p') || 'parcours').toLowerCase();
+  const token    = params.get('k') || '';
+  const canEdit  = token.length > 0;
+
+  const $ = id => document.getElementById(id);
+  const grid = $('grid');
+  const chip = $('chip'), chipText = $('chipText');
+
+  let config = null;
+  let state  = { checked:{}, links:{} };
+  let apiUp  = true;
+  let saveTimer = null, chipTimer = null;
+
+  const CHECK = '<svg viewBox="0 0 24 24"><polyline points="5,12.5 10,17.5 19,7"/></svg>';
+  const LINK  = '<svg class="glyph" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>';
+
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  const safeUrl = u => {
+    const v = String(u || '').trim();
+    if (!v) return '';
+    if (/^https?:\/\//i.test(v)) return v;
+    if (/^javascript:|^data:|^vbscript:/i.test(v)) return '';
+    return /^[\w-]+(\.[\w-]+)+/.test(v) ? 'https://' + v : '';
+  };
+
+  function say(text, stateName, sticky){
+    clearTimeout(chipTimer);
+    chipText.textContent = text;
+    chip.dataset.state = stateName;
+    chip.classList.add('on');
+    if (!sticky) chipTimer = setTimeout(() => chip.classList.remove('on'), 2600);
+  }
+
+  /* ---------- rendu ---------- */
+  function render(){
+    document.title = `${config.titre} ${config.titreAccent || ''}`.trim();
+    $('title').innerHTML = `${esc(config.titre)} <span>${esc(config.titreAccent || '')}</span>`;
+    $('sub').textContent = config.sousTitre || '';
+    $('total').textContent = `/ ${config.etapes.length} ${config.labelJalons || 'jalons'}`;
+    $('meter').hidden = false;
+
+    grid.innerHTML = config.etapes.map((e, i) => `
+      <section class="step" data-step="${esc(e.id)}" style="animation-delay:${(0.05 + i * 0.06).toFixed(2)}s">
+        <div class="step-head">
+          <div class="wick"></div>
+          <h2 class="step-title">${esc(e.titre)}</h2>
+        </div>
+        <p class="week">${esc(e.semaine || '')}</p>
+        <p class="jalon"><b>Jalon</b> — ${esc(e.jalon || '')}</p>
+        <ul class="tasks">
+          ${(e.taches || []).map(t => `
+            <li><label class="task">
+              <input type="checkbox" data-task="${esc(t.id)}" ${canEdit ? '' : 'disabled'}>
+              <span class="dot">${CHECK}</span>
+              <span class="task-label">${esc(t.texte)}</span>
+            </label></li>`).join('')}
+        </ul>
+        <div class="link-row">${LINK}${
+          canEdit
+            ? `<input class="link-input" type="url" inputmode="url" data-link="${esc(e.id)}" placeholder="Coller le lien du rendu">
+               <button class="open-link" type="button">Ouvrir</button>`
+            : `<span class="link-static" data-static="${esc(e.id)}">Aucun lien déposé</span>`
+        }</div>
+      </section>`).join('');
+
+    $('notes').innerHTML = (config.reperes || [])
+      .map(r => `<p class="note"><span>${esc(r.cle)}</span> ${esc(r.texte)}</p>`).join('');
+    $('notes').hidden = false;
+
+    if (canEdit) wireEditing();
+    apply();
+  }
+
+  function wireEditing(){
+    grid.querySelectorAll('input[type=checkbox]').forEach(box => {
+      box.addEventListener('change', () => {
+        state.checked[box.dataset.task] = box.checked;
+        apply();
+        queueSave();
+      });
+    });
+
+    grid.querySelectorAll('.link-input').forEach(input => {
+      const btn = input.parentElement.querySelector('.open-link');
+      const sync = () => btn.classList.toggle('on', !!safeUrl(input.value));
+      input.addEventListener('input', () => {
+        state.links[input.dataset.link] = input.value.trim();
+        sync();
+        queueSave();
+      });
+      btn.addEventListener('click', () => {
+        const u = safeUrl(input.value);
+        if (u) window.open(u, '_blank', 'noopener');
+      });
+    });
+  }
+
+  /* ---------- application de l'état ---------- */
+  function apply(){
+    let lit = 0;
+
+    config.etapes.forEach(e => {
+      const card = grid.querySelector(`[data-step="${CSS.escape(e.id)}"]`);
+      if (!card) return;
+
+      const ids = (e.taches || []).map(t => t.id);
+      ids.forEach(id => {
+        const box = card.querySelector(`[data-task="${CSS.escape(id)}"]`);
+        if (box) box.checked = !!state.checked[id];
+      });
+
+      const full = ids.length > 0 && ids.every(id => state.checked[id]);
+      card.classList.toggle('lit', full);
+      if (full) lit++;
+
+      const url = safeUrl(state.links[e.id]);
+      const input = card.querySelector('.link-input');
+      if (input){
+        if (document.activeElement !== input) input.value = state.links[e.id] || '';
+        card.querySelector('.open-link').classList.toggle('on', !!url);
+      } else {
+        const span = card.querySelector('.link-static');
+        if (span) span.innerHTML = url
+          ? `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(url)}</a>`
+          : 'Aucun lien déposé';
+      }
+    });
+
+    const ratio = config.etapes.length ? lit / config.etapes.length : 0;
+    $('done').textContent = lit;
+    $('fill').style.width = (ratio * 100) + '%';
+    document.documentElement.style.setProperty('--glow', ratio.toFixed(2));
+  }
+
+  /* ---------- serveur ---------- */
+  async function load(){
+    try{
+      const r = await fetch(`api/progress?p=${encodeURIComponent(slug)}`, { cache:'no-store' });
+      if (!r.ok) throw new Error(r.status);
+      const data = await r.json();
+      state = { checked: data.checked || {}, links: data.links || {} };
+      apiUp = true;
+    }catch(err){
+      apiUp = false;
+      say('Hors ligne', 'error', true);
+    }
+  }
+
+  function queueSave(){
+    if (!apiUp) return;
+    say('Enregistrement', 'saving', true);
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(save, 800);
+  }
+
+  async function save(){
+    try{
+      const r = await fetch(`api/progress?p=${encodeURIComponent(slug)}&k=${encodeURIComponent(token)}`, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ checked: state.checked, links: state.links })
+      });
+      if (!r.ok) throw new Error(r.status);
+      say('Enregistré', 'saved');
+    }catch(err){
+      say('Échec de l’enregistrement', 'error', true);
+    }
+  }
+
+  /* ---------- démarrage ---------- */
+  (async () => {
+    try{
+      const r = await fetch('parcours.json', { cache:'no-store' });
+      if (!r.ok) throw new Error(r.status);
+      config = await r.json();
+    }catch(err){
+      grid.innerHTML = '<p class="boot">Le contenu du parcours n’a pas pu être chargé. Vérifier le fichier parcours.json.</p>';
+      return;
+    }
+
+    await load();
+    render();
+
+    if (!canEdit){
+      document.body.classList.add('readonly');
+      if (apiUp) say('Lecture seule', 'idle', true);
+      setInterval(async () => { await load(); if (apiUp) apply(); }, 45000);
+    }
+  })();
+})();
+</script>
+</body>
+</html>
