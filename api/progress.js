@@ -27,7 +27,13 @@ const json = (body, status = 200) =>
   });
 
 const readSlug = request => {
-  const slug = (new URL(request.url).searchParams.get('p') || '').toLowerCase();
+  // Priorité au sous-domaine : "parcours-virginie.vercel.app" → "virginie".
+  const host = (request.headers.get('host') || '').split(':')[0];
+  const sub  = host.split('.')[0] || '';
+  const m = sub.match(/^parcours-(.+)$/);
+  let slug = m && m[1] ? m[1].toLowerCase() : '';
+  // Repli sur ?p= (tests locaux, ou host ne suivant pas la convention).
+  if (!slug) slug = (new URL(request.url).searchParams.get('p') || '').toLowerCase();
   return SLUG_RE.test(slug) ? slug : null;
 };
 

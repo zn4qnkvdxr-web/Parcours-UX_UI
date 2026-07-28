@@ -1,5 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/((?!api/|parcours.json|favicon).*)", "destination": "/index.html" }
+  ],
   "headers": [
     {
       "source": "/(.*)",

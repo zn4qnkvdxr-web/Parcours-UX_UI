@@ -312,9 +312,26 @@ body.readonly .task input:checked + .dot{border-color:var(--norsys)}
 (() => {
   'use strict';
 
-  const params   = new URLSearchParams(location.search);
-  const slug     = (params.get('p') || 'parcours').toLowerCase();
-  const token    = params.get('k') || '';
+  // Slug déduit du sous-domaine : "parcours-virginie.vercel.app" → "virginie".
+  // Repli sur ?p= pour les tests locaux (fichier ouvert hors Vercel).
+  function resolveSlug(){
+    const host = location.hostname || '';
+    const sub  = host.split('.')[0] || '';
+    const m = sub.match(/^parcours-(.+)$/);
+    if (m && m[1]) return m[1].toLowerCase();
+    const q = new URLSearchParams(location.search).get('p');
+    return (q || 'parcours').toLowerCase();
+  }
+
+  // Édition : le token est le chemin d'URL (/monToken). Repli sur ?k= en local.
+  function resolveToken(){
+    const seg = location.pathname.replace(/^\/+|\/+$/g, '');
+    if (seg) return decodeURIComponent(seg);
+    return new URLSearchParams(location.search).get('k') || '';
+  }
+
+  const slug     = resolveSlug();
+  const token    = resolveToken();
   const canEdit  = token.length > 0;
 
   const $ = id => document.getElementById(id);
@@ -464,7 +481,7 @@ body.readonly .task input:checked + .dot{border-color:var(--norsys)}
   /* ---------- serveur ---------- */
   async function load(){
     try{
-      const r = await fetch(`api/progress?p=${encodeURIComponent(slug)}`, { cache:'no-store' });
+      const r = await fetch(`/api/progress?p=${encodeURIComponent(slug)}`, { cache:'no-store' });
       if (!r.ok) throw new Error(r.status);
       const data = await r.json();
       state = { checked: data.checked || {}, links: data.links || {} };
@@ -484,9 +501,9 @@ body.readonly .task input:checked + .dot{border-color:var(--norsys)}
 
   async function save(){
     try{
-      const r = await fetch(`api/progress?p=${encodeURIComponent(slug)}&k=${encodeURIComponent(token)}`, {
+      const r = await fetch(`/api/progress?p=${encodeURIComponent(slug)}`, {
         method:'POST',
-        headers:{ 'Content-Type':'application/json' },
+        headers:{ 'Content-Type':'application/json', 'x-edit-token': token },
         body: JSON.stringify({ checked: state.checked, links: state.links })
       });
       if (!r.ok) throw new Error(r.status);

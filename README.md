@@ -57,17 +57,20 @@ curl "https://<projet>.vercel.app/api/progress?p=<slug>"
 
 ## 2. Les deux liens
 
+Le slug est déduit du sous-domaine : un projet nommé `parcours-<nom>` sert automatiquement le parcours `<nom>`. Aucun paramètre à ajouter pour la lecture.
+
 | Usage | Lien | Droits |
 |---|---|---|
-| Suivi, référents | `https://<projet>.vercel.app/?p=<slug>` | lecture, rafraîchi toutes les 45 s |
-| Personne accompagnée | `https://<projet>.vercel.app/?p=<slug>&k=<EDIT_TOKEN>` | lecture et écriture |
+| Suivi, référents | `https://parcours-<nom>.vercel.app/` | lecture, rafraîchi toutes les 45 s |
+| Personne accompagnée | `https://parcours-<nom>.vercel.app/<EDIT_TOKEN>` | lecture et écriture |
 
-`<slug>` identifie le parcours : minuscules, chiffres et tirets, entre 2 et 40 caractères.
-Un slug par personne accompagnée — même fichier, autant de parcours que voulu.
+Le lien d'édition place le jeton dans le chemin. La racine, elle, reste propre et diffusable — elle ne contient jamais le jeton.
 
-Choisir un slug non devinable plutôt que `1` ou `test` : la lecture est publique pour qui possède le lien.
+**Réutilisation.** Pour une nouvelle personne, déployer un projet nommé `parcours-<autre-nom>` : le slug suit tout seul, sans toucher au code. Un déploiement par personne, même base de code.
 
-**Ce que le jeton protège vraiment.** L'écriture est vérifiée côté serveur : sans jeton valide, aucune modification n'est acceptée. La lecture, elle, reste ouverte à qui détient l'adresse. Adapté à un partage interne, insuffisant pour des données sensibles.
+**Ce que le jeton protège vraiment.** L'écriture est vérifiée côté serveur par comparaison à durée constante : sans jeton valide, aucune modification n'est acceptée. La lecture reste ouverte à qui détient l'adresse racine. Adapté à un partage interne, insuffisant pour des données sensibles.
+
+Repli local : hors Vercel (fichier ouvert directement), l'ancienne forme `?p=<slug>` et `?k=<jeton>` reste active pour les tests.
 
 ---
 
