@@ -124,30 +124,45 @@ h1 span{color:var(--flame);font-weight:500;letter-spacing:-.012em}
   box-shadow:inset 0 1px 0 var(--glass-hi),0 0 0 1px rgba(139,197,63,.06),0 22px 60px -34px rgba(240,166,60,.50);
 }
 
-.step-head{display:flex;align-items:flex-start;gap:13px;margin-bottom:5px}
-.wick{
-  position:relative;flex:none;width:9px;height:9px;margin-top:8px;border-radius:50%;
-  background:transparent;border:1px solid var(--ui-line);
-  transition:background .5s,border-color .5s,box-shadow .5s;
+.step-head{display:flex;align-items:flex-start;gap:15px;margin-bottom:5px}
+.glyph-step{
+  flex:none;width:40px;height:40px;border-radius:12px;
+  display:grid;place-items:center;margin-top:-2px;
+  background:rgba(240,166,60,.06);
+  border:1px solid var(--line);
+  box-shadow:inset 0 1px 0 var(--glass-hi);
+  transition:background .55s ease,border-color .55s ease,box-shadow .55s ease;
 }
-.step.lit .wick{
-  background:var(--norsys);border-color:var(--norsys);
-  box-shadow:0 0 12px 2px rgba(139,197,63,.50),0 0 30px 7px rgba(139,197,63,.18);
+.glyph-step svg{width:22px;height:22px;display:block;overflow:visible}
+.glyph-step svg *{
+  stroke:var(--flame);stroke-width:1.6;fill:none;
+  stroke-linecap:round;stroke-linejoin:round;
+  vector-effect:non-scaling-stroke;
+  transition:stroke .55s ease,fill .55s ease;
 }
+.glyph-step svg .fillable{fill:rgba(240,166,60,.14);stroke:none;transition:fill .55s ease}
+.step.lit .glyph-step{
+  background:rgba(139,197,63,.12);
+  border-color:rgba(139,197,63,.34);
+  box-shadow:inset 0 1px 0 var(--glass-hi),0 0 18px -4px rgba(139,197,63,.5);
+}
+.step.lit .glyph-step svg *{stroke:var(--norsys)}
+.step.lit .glyph-step svg .fillable{fill:rgba(139,197,63,.20);stroke:none}
 
 .step-title{
   font-family:'Jost',ui-sans-serif,system-ui,sans-serif;
-  font-weight:600;font-size:19.5px;line-height:1.3;letter-spacing:-.016em;
+  font-weight:600;font-size:19.5px;line-height:1.25;letter-spacing:-.016em;
+  align-self:center;
 }
-.week{font-family:'Jost',sans-serif;font-weight:500;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-faint);margin:0 0 16px 22px}
+.week{font-family:'Jost',sans-serif;font-weight:500;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-faint);margin:0 0 16px 55px}
 .jalon{
-  margin:0 0 18px 22px;padding-left:13px;border-left:1px solid var(--line);
+  margin:0 0 18px 55px;padding-left:13px;border-left:1px solid var(--line);
   font-size:13.5px;line-height:1.6;color:var(--text-dim);
 }
 .jalon b{color:var(--text);font-weight:500}
 
 /* ─────────── cases ─────────── */
-.tasks{list-style:none;margin-left:22px;flex:1}
+.tasks{list-style:none;margin-left:55px;flex:1}
 .task{display:flex;align-items:center;gap:12px;padding:0 0;cursor:pointer;height:44px}
 .task input{position:absolute;opacity:0;width:0;height:0}
 
@@ -184,7 +199,7 @@ body.readonly .task:hover .dot{border-color:var(--ui-line)}
 body.readonly .task input:checked + .dot{border-color:var(--norsys)}
 
 /* ─────────── champ lien ─────────── */
-.link-row{display:flex;align-items:center;gap:11px;margin:20px 0 0 22px;padding-top:16px;border-top:1px solid var(--line-soft)}
+.link-row{display:flex;align-items:center;gap:11px;margin:20px 0 0 55px;padding-top:16px;border-top:1px solid var(--line-soft)}
 .glyph{width:14px;height:14px;flex:none;stroke:var(--ui-line);stroke-width:1.6;fill:none;transition:stroke .35s}
 .link-row:focus-within .glyph{stroke:var(--norsys)}
 .link-input{
@@ -246,6 +261,8 @@ body.readonly .task input:checked + .dot{border-color:var(--norsys)}
 
 /* ─────────── large : deux cartes par ligne ─────────── */
 @media (min-width:880px){
+  .grid{align-items:stretch}
+  .link-row{margin-top:auto}
   .wrap{max-width:1140px;padding-top:88px;padding-bottom:130px}
   .head{margin-bottom:38px}
   h1{font-size:clamp(50px,4.6vw,64px)}
@@ -311,6 +328,15 @@ body.readonly .task input:checked + .dot{border-color:var(--norsys)}
 
   const CHECK = '<svg viewBox="0 0 24 24"><polyline points="5,12.5 10,17.5 19,7"/></svg>';
   const LINK  = '<svg class="glyph" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>';
+  const ICONS = {
+    e1: '<circle class="fillable" cx="5.5" cy="5" r="2.4"/><circle cx="5.5" cy="5" r="2.4"/><circle class="fillable" cx="12" cy="5" r="2.4"/><circle cx="12" cy="5" r="2.4"/><circle cx="18.5" cy="5" r="2.4"/><rect class="fillable" x="4" y="13" width="16" height="7" rx="3.5"/><rect x="4" y="13" width="16" height="7" rx="3.5"/><path d="M8 16.5h8"/>',
+    e2: '<rect x="3" y="3" width="8" height="8" rx="1.6"/><rect class="fillable" x="14" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.6"/><rect x="13" y="13" width="9" height="9" rx="1.6"/><rect class="fillable" x="15.5" y="16.5" width="4" height="2.2" rx="1.1"/>',
+    e3: '<path d="M3 8h18M3 13h18M8 3v18M14 3v18" stroke-width="1"/><rect class="fillable" x="3" y="3" width="5" height="5" rx="1"/><rect class="fillable" x="14" y="13" width="7" height="8" rx="1"/><rect x="14" y="13" width="7" height="8" rx="1"/>',
+    e4: '<rect class="fillable" x="3" y="4" width="18" height="4.4" rx="1.4"/><rect x="3" y="4" width="18" height="4.4" rx="1.4"/><rect x="3" y="10.8" width="18" height="4.4" rx="1.4" stroke-dasharray="2.5 2.5"/><rect x="3" y="17.6" width="18" height="4.4" rx="1.4"/><path d="M9.5 19.8l1.6 1.6M11.1 19.8l-1.6 1.6"/>',
+    e5: '<rect x="2.5" y="6" width="8" height="12" rx="1.6"/><rect x="13.5" y="6" width="8" height="12" rx="1.6"/><path d="M10.5 12h3"/><path d="M12 10.5l1.8 1.5-1.8 1.5" class="fillable" fill="none"/><circle class="fillable" cx="6.5" cy="15" r="1"/>',
+    e6: '<rect x="4" y="3" width="16" height="18" rx="2"/><rect class="fillable" x="4" y="3" width="16" height="4" rx="2"/><path d="M4 7h16"/><rect class="fillable" x="7" y="10" width="10" height="2" rx="1"/><path d="M7 14.5h10M7 17h6"/>',
+  };
+  const iconFor = id => ICONS[id] || '<circle cx="12" cy="12" r="7"/>';
 
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -342,7 +368,7 @@ body.readonly .task input:checked + .dot{border-color:var(--norsys)}
     grid.innerHTML = config.etapes.map((e, i) => `
       <section class="step" data-step="${esc(e.id)}" style="animation-delay:${(0.05 + i * 0.06).toFixed(2)}s">
         <div class="step-head">
-          <div class="wick"></div>
+          <span class="glyph-step" aria-hidden="true"><svg viewBox="0 0 24 24">${iconFor(e.id)}</svg></span>
           <h2 class="step-title">${esc(e.titre)}</h2>
         </div>
         <p class="week">${esc(e.etape || '')}</p>
