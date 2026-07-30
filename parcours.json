@@ -29,7 +29,7 @@
         },
         {
           "id": "e1-test",
-          "texte": "Valider le test du label long"
+          "texte": "Vérifier que le CTA s'adapte seul avec un long texte"
         }
       ]
     },
