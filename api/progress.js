@@ -10,7 +10,8 @@
 
 const KEY_PREFIX = 'parcours:';
 const SLUG_RE    = /^[a-z0-9][a-z0-9-]{1,39}$/;
-const MAX_BYTES  = 32 * 1024;
+const MAX_BYTES  = 200 * 1024;
+const MAX_NOTE   = 8000;
 
 // L'intégration Vercel injecte l'un ou l'autre jeu de noms selon son millésime.
 const STORE_URL   = process.env.UPSTASH_REDIS_REST_URL   || process.env.KV_REST_API_URL   || '';
@@ -71,6 +72,7 @@ async function storeSet(key, value) {
 function sanitize(payload) {
   const checked = {};
   const links   = {};
+  const notes   = {};
 
   for (const [k, v] of Object.entries(payload?.checked || {})) {
     if (typeof k === 'string' && k.length <= 64 && v === true) checked[k] = true;
@@ -80,7 +82,13 @@ function sanitize(payload) {
     const url = String(v ?? '').trim().slice(0, 500);
     if (url) links[k] = url;
   }
-  return { checked, links, updatedAt: new Date().toISOString() };
+  for (const [k, v] of Object.entries(payload?.notes || {})) {
+    if (typeof k !== 'string' || k.length > 64) continue;
+    // On borne à MAX_NOTE côté serveur aussi (double sécurité), on préserve le texte tel quel.
+    const txt = String(v ?? '').slice(0, MAX_NOTE);
+    if (txt.trim()) notes[k] = txt;
+  }
+  return { checked, links, notes, updatedAt: new Date().toISOString() };
 }
 
 export async function GET(request) {
@@ -89,7 +97,7 @@ export async function GET(request) {
 
   try {
     const data = await storeGet(KEY_PREFIX + slug);
-    return json(data || { checked: {}, links: {}, updatedAt: null });
+    return json(data || { checked: {}, links: {}, notes: {}, updatedAt: null });
   } catch (err) {
     return json({ error: 'lecture impossible' }, 502);
   }

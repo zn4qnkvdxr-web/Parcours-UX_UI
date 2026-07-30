@@ -230,6 +230,65 @@ body.readonly .task input:checked + .dot{border-color:var(--norsys)}
 .open-link.on{opacity:1;transform:none;pointer-events:auto}
 .open-link:hover{color:var(--norsys);border-color:var(--norsys)}
 
+/* ─────────── zone de notes ─────────── */
+.notes-row{position:relative;margin:16px 0 0 55px}
+.note-label{
+  display:block;margin-bottom:7px;
+  font:500 10px/1 'Jost',sans-serif;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--text-faint);transition:color .4s;
+}
+.note-input{
+  width:100%;display:block;resize:vertical;overflow:hidden;
+  min-height:38px;max-height:70vh;
+  background:rgba(240,225,205,.03);
+  border:1px solid var(--line);border-radius:12px;
+  padding:11px 13px;
+  font:400 13.5px/1.6 'Archivo',sans-serif;color:var(--text);
+  transition:border-color .3s,background .3s;
+}
+.note-input::placeholder{color:var(--text-faint)}
+.note-input:focus{
+  outline:none;border-color:var(--norsys);
+  background:rgba(240,225,205,.05);
+}
+.note-count{
+  position:absolute;right:10px;bottom:-16px;
+  font:400 10.5px/1 'Archivo',sans-serif;color:var(--text-faint);
+  font-variant-numeric:tabular-nums;
+}
+/* lecture : bloc préformaté, coupé à 3 lignes puis dépliable */
+.note-clamp{
+  position:relative;
+  padding-left:13px;border-left:1px solid var(--line);
+  max-height:calc(1.6em * 3);overflow:hidden;
+  transition:max-height .38s ease;
+}
+.note-clamp.open{max-height:2000px}
+.note-static{
+  font:400 13.5px/1.6 'Archivo',sans-serif;color:var(--text-dim);
+  white-space:pre-wrap;word-break:break-word;
+}
+.note-static.empty{color:var(--text-faint);font-style:italic}
+/* fondu de coupe quand replié ET débordant */
+.note-clamp.overflows:not(.open)::after{
+  content:'';position:absolute;left:0;right:0;bottom:0;height:1.5em;
+  background:linear-gradient(to bottom,rgba(15,11,17,0),var(--ink));
+  pointer-events:none;
+}
+.note-more{
+  margin-top:9px;padding:0;border:0;background:none;cursor:pointer;
+  font:500 11px/1 'Jost',sans-serif;letter-spacing:.05em;
+  color:var(--norsys);transition:color .25s;
+}
+.note-more:hover{color:var(--flame)}
+/* signal "note présente" */
+.step.has-note .note-label{color:var(--norsys)}
+.step.has-note .note-label::after{
+  content:'';display:inline-block;width:5px;height:5px;margin-left:7px;
+  border-radius:50%;background:var(--norsys);vertical-align:middle;
+  box-shadow:0 0 7px rgba(139,197,63,.6);
+}
+
 /* ─────────── pied ─────────── */
 .notes[hidden],.notes:empty{display:none}
 .notes{margin-top:clamp(38px,9vw,58px);padding-top:22px;border-top:1px solid var(--line-soft);display:grid;gap:9px}
@@ -339,7 +398,7 @@ body.readonly .task input:checked + .dot{border-color:var(--norsys)}
   const chip = $('chip'), chipText = $('chipText');
 
   let config = null;
-  let state  = { checked:{}, links:{} };
+  let state  = { checked:{}, links:{}, notes:{} };
   let apiUp  = true;
   let saveTimer = null, chipTimer = null;
 
@@ -404,6 +463,17 @@ body.readonly .task input:checked + .dot{border-color:var(--norsys)}
                <button class="open-link" type="button">Ouvrir</button>`
             : `<span class="link-static" data-static="${esc(e.id)}">Aucun lien déposé</span>`
         }</div>
+        <div class="notes-row">${
+          canEdit
+            ? `<span class="note-label">Notes</span>
+               <textarea class="note-input" data-note="${esc(e.id)}" rows="1" maxlength="8000" placeholder="Notes, retours, questions…"></textarea>
+               <span class="note-count" data-count="${esc(e.id)}" aria-hidden="true"></span>`
+            : `<span class="note-label">Notes</span>
+               <div class="note-clamp" data-noteclamp="${esc(e.id)}">
+                 <div class="note-static" data-notestatic="${esc(e.id)}"></div>
+               </div>
+               <button class="note-more" type="button" data-notemore="${esc(e.id)}" hidden>voir plus</button>`
+        }</div>
       </section>`).join('');
 
     const rep = config.reperes || [];
@@ -414,7 +484,20 @@ body.readonly .task input:checked + .dot{border-color:var(--norsys)}
     }
 
     if (canEdit) wireEditing();
+    else wireReadonly();
     apply();
+  }
+
+  function wireReadonly(){
+    grid.querySelectorAll('.note-more').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.notemore;
+        const clamp = grid.querySelector(`[data-noteclamp="${CSS.escape(id)}"]`);
+        if (!clamp) return;
+        const open = clamp.classList.toggle('open');
+        btn.textContent = open ? 'voir moins' : 'voir plus';
+      });
+    });
   }
 
   function wireEditing(){
@@ -437,6 +520,38 @@ body.readonly .task input:checked + .dot{border-color:var(--norsys)}
       btn.addEventListener('click', () => {
         const u = safeUrl(input.value);
         if (u) window.open(u, '_blank', 'noopener');
+      });
+    });
+
+    grid.querySelectorAll('.note-input').forEach(area => {
+      const id = area.dataset.note;
+      const counter = grid.querySelector(`[data-count="${CSS.escape(id)}"]`);
+      const grow = () => {
+        if (area.dataset.manual === '1') return;   // hauteur fixée à la main : ne pas écraser
+        area.dataset.growing = '1';
+        area.style.height = 'auto';
+        area.style.height = area.scrollHeight + 'px';
+        requestAnimationFrame(() => { area.dataset.growing = '0'; });
+      };
+      const countShow = () => {
+        const n = area.value.length;
+        if (counter) counter.textContent = n > 7000 ? `${n} / 8000` : '';
+      };
+      // détecter un redimensionnement manuel via le grip
+      let lastH = area.offsetHeight;
+      const ro = new ResizeObserver(() => {
+        if (document.activeElement === area && Math.abs(area.offsetHeight - lastH) > 2 && area.dataset.growing !== '1'){
+          area.dataset.manual = '1';
+          area.style.overflow = 'auto';
+        }
+        lastH = area.offsetHeight;
+      });
+      ro.observe(area);
+      area.addEventListener('input', () => {
+        state.notes[id] = area.value;
+        grow();
+        countShow();
+        queueSave();
       });
     });
   }
@@ -470,6 +585,42 @@ body.readonly .task input:checked + .dot{border-color:var(--norsys)}
           ? `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(url)}</a>`
           : 'Aucun lien déposé';
       }
+
+      const noteVal = state.notes[e.id] || '';
+      const area = card.querySelector('.note-input');
+      if (area){
+        if (document.activeElement !== area){
+          area.value = noteVal;
+          if (area.dataset.manual !== '1'){
+            area.style.height = 'auto';
+            area.style.height = (area.scrollHeight || 0) + 'px';
+          }
+        }
+        card.classList.toggle('has-note', !!noteVal.trim());
+      } else {
+        const ns = card.querySelector('.note-static');
+        const clamp = card.querySelector('.note-clamp');
+        const more = card.querySelector('.note-more');
+        const has = !!noteVal.trim();
+        card.classList.toggle('has-note', has);
+        if (ns){
+          ns.textContent = has ? noteVal : 'Aucune note';
+          ns.classList.toggle('empty', !has);
+        }
+        // "voir plus" seulement si le texte déborde des 3 lignes et n'est pas déjà déplié
+        if (clamp && more){
+          if (!has || clamp.classList.contains('open')){
+            more.hidden = clamp.classList.contains('open') ? false : true;
+          } else {
+            // mesure après rendu : dépassement réel ?
+            requestAnimationFrame(() => {
+              const overflows = ns.scrollHeight > clamp.clientHeight + 2;
+              clamp.classList.toggle('overflows', overflows);
+              more.hidden = !overflows;
+            });
+          }
+        }
+      }
     });
 
     const ratio = config.etapes.length ? lit / config.etapes.length : 0;
@@ -484,7 +635,7 @@ body.readonly .task input:checked + .dot{border-color:var(--norsys)}
       const r = await fetch(`/api/progress?p=${encodeURIComponent(slug)}`, { cache:'no-store' });
       if (!r.ok) throw new Error(r.status);
       const data = await r.json();
-      state = { checked: data.checked || {}, links: data.links || {} };
+      state = { checked: data.checked || {}, links: data.links || {}, notes: data.notes || {} };
       apiUp = true;
     }catch(err){
       apiUp = false;
@@ -504,7 +655,7 @@ body.readonly .task input:checked + .dot{border-color:var(--norsys)}
       const r = await fetch(`/api/progress?p=${encodeURIComponent(slug)}`, {
         method:'POST',
         headers:{ 'Content-Type':'application/json', 'x-edit-token': token },
-        body: JSON.stringify({ checked: state.checked, links: state.links })
+        body: JSON.stringify({ checked: state.checked, links: state.links, notes: state.notes })
       });
       if (!r.ok) throw new Error(r.status);
       say('Enregistré', 'saved');
